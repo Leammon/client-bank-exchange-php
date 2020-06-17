@@ -7,11 +7,54 @@ class Parser implements \ArrayAccess
     protected $encoding;
     protected $result;
 
-    public function __construct($file, $encoding = 'cp1251')
+    public function __construct($file, $encoding = '')
     {
         $this->encoding = $encoding;
         $this->result = $this->parse_file($file);
     }
+
+    /*public function detectEncoding($filePath){
+        $fopen=fopen($filePath,'r');
+
+        $row = fgets($fopen);
+        $encodings = mb_list_encodings();
+        $encoding = mb_detect_encoding( $row, mb_list_encodings() );
+
+        if($encoding !== false) {
+            $key = array_search($encoding, $encodings) !== false;
+            if ($key !== false)
+                unset($encodings[$key]);
+            $encodings = array_values($encodings);
+        }
+
+        $encKey = 0;
+        while ($row = fgets($fopen)) {
+            if($encoding == false){
+                $encoding = $encodings[$encKey++];
+            }
+
+            if(!mb_check_encoding($row, $encoding)){
+                $encoding =false;
+                rewind($fopen);
+            }
+
+        }
+
+        return $encoding;
+
+        //check string strict for encoding out of list of supported encodings
+        $enc = mb_detect_encoding($str, mb_list_encodings(), true);
+
+        if ($enc===false){
+            //could not detect encoding
+        }
+        else if ($enc!=="UTF-8"){
+            $str = mb_convert_encoding($str, "UTF-8", $enc);
+        }
+        else {
+            //UTF-8 detected
+        }
+    }*/
 
     protected function defaultResult()
     {
@@ -28,8 +71,28 @@ class Parser implements \ArrayAccess
         if (!file_exists($path)) {
             throw new Exception('File does not exists: '.$path);
         }
-
-        return $this->parse(file_get_contents($path));
+        $text = file_get_contents($path);
+        if(!$this->encoding){
+            $str = '';
+            $fopen=fopen($path,'r');
+            while (($row = fgets($fopen)) && (strlen($str)<600)) {
+                $str .=$row;
+            }
+            $detector = new EncodingDetector();
+            $encoding = $detector->getEncoding($str);
+            switch($encoding){
+                case EncodingDetector::IBM866:
+                    $text = iconv('CP866','UTF-8',$text);
+                    break;
+                case EncodingDetector::WINDOWS_1251:
+                    $text = iconv('CP1251','UTF-8',$text);
+                    break;
+                case EncodingDetector::UTF_8:
+                default:
+                    //its ok
+            }
+        }
+        return $this->parse($text);
     }
 
     public function parse($content)
