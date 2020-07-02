@@ -142,8 +142,11 @@ class Parser implements \ArrayAccess
                 $matchResult = preg_match("/^{$key}=(.*)$/um", $content, $matches);
 
             if ($matchResult ) {
-                if($is_array)
+                if($is_array) {
                     $matches[1] = array_unique($matches[1]);
+                    foreach ($matches[1] as $k=>$v)
+                        $matches[1][$k] = trim($v);
+                }
                 $result[$key] = !$is_array?trim($matches[1]):(count($matches[1])>1?$matches[1]:trim($matches[1][0]));
             } else {
                 $result[$key] = null;
