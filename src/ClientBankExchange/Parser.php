@@ -134,14 +134,21 @@ class Parser implements \ArrayAccess
     {
         $result = [];
         foreach (Model\FilterSection::fields() as $key) {
-            if (preg_match("/^{$key}=(.+)/um", $content, $matches)) {
-                array_shift ( $matches );
-                $result[$key] = count($matches)==1?trim($matches[1]):$matches;
+            $is_array = in_array($key,Model\FilterSection::arrayFields());
+            if($is_array){
+                $matchResult = preg_match_all("/^{$key}=(.*)$/um", $content, $matches);
+            }
+            else
+                $matchResult = preg_match("/^{$key}=(.*)$/um", $content, $matches);
+
+            if ($matchResult ) {
+                if($is_array)
+                    $matches[1] = array_unique($matches[1]);
+                $result[$key] = !$is_array?trim($matches[1]):(count($matches[1])>1?$matches[1]:trim($matches[1][0]));
             } else {
                 $result[$key] = null;
             }
         }
-
         return new Model\FilterSection($result);
     }
 
