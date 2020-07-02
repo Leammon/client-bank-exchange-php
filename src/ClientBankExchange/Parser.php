@@ -135,7 +135,8 @@ class Parser implements \ArrayAccess
         $result = [];
         foreach (Model\FilterSection::fields() as $key) {
             if (preg_match("/^{$key}=(.+)/um", $content, $matches)) {
-                $result[$key] = trim($matches[1]);
+                array_shift ( $matches );
+                $result[$key] = count($matches)==1?trim($matches[1]):$matches;
             } else {
                 $result[$key] = null;
             }

@@ -11,6 +11,11 @@ class Component implements \ArrayAccess
         return [];
     }
 
+    public static function arrayFields()
+    {
+        return [];
+    }
+
     public function __construct(array $data = [])
     {
         $this->init();
@@ -18,7 +23,19 @@ class Component implements \ArrayAccess
             if (!array_key_exists($k, $this->data)) {
                 throw new Exception('There should no be such field ('.$k.') in '.static::class.' according to 1CClientBankExchange v1.02 format See http://v8.1c.ru/edi/edi_stnd/100/101.htm');
             }
-            $this->data[$k] = $v;
+            if(is_array($v)){
+                if(in_array($k,self::arrayFields())){
+                    throw new Exception('Not an array field ('.$k.') in '.static::class);
+                }else{
+                    $this->data[$k] = $v;
+                }
+            }else{
+                if(in_array($k,self::arrayFields())){
+                    $this->data[$k] = [$v];
+                }else{
+                    $this->data[$k] = $v;
+                }
+            }
         }
     }
 

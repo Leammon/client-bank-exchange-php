@@ -16,6 +16,10 @@ class FilterSection extends Component
         ];
     }
 
+    public static function arrayFields(){
+        return ['РасчСчет'];
+    }
+
     public function __construct($data = [])
     {
         parent::__construct($data);
