@@ -21,7 +21,8 @@ class Component implements \ArrayAccess
         $this->init();
         foreach ($data as $k => $v) {
             if (!array_key_exists($k, $this->data)) {
-                throw new Exception('There should no be such field ('.$k.') in '.static::class.' according to 1CClientBankExchange v1.02 format See http://v8.1c.ru/edi/edi_stnd/100/101.htm');
+                break;
+                //throw new Exception('There should no be such field ('.$k.') in '.static::class.' according to 1CClientBankExchange v1.02 format See http://v8.1c.ru/edi/edi_stnd/100/101.htm');
             }
             if(is_array($v)){
                 if(in_array($k,self::arrayFields())){
